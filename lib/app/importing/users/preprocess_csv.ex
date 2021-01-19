@@ -33,9 +33,9 @@ defmodule App.Importing.Users.PreprocessCSV do
     end)
   end
 
-  # return tuple so errors can be tracked
+  # return tuple so warnings can be tracked
   def preprocess_row_fun({:error, message}) do
-    Logger.error(message)
+    Logger.warn(message)
     {:error, message}
   end
 

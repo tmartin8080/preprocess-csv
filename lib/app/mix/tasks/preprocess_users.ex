@@ -6,6 +6,13 @@ defmodule Mix.Tasks.App.PreprocessUsers do
   - `phone`
   - `email_or_phone`
 
+  Docs for CSV package:
+  https://hexdocs.pm/csv/CSV.html#decode/2
+
+  `:validate_row_length` can be adjusted to ignore row length.
+  If there's a mismatch, this row is currently being ignored and
+  Logged to the console.
+
   Usage:
     mix app.preprocess_users data.csv email
   """
