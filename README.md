@@ -1,21 +1,41 @@
 # App
 
-**TODO: Add description**
+Preprocess csv file to dedupe.
 
 ## Installation
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `app` to your list of dependencies in `mix.exs`:
-
-```elixir
-def deps do
-  [
-    {:app, "~> 0.1.0"}
-  ]
-end
+```
+$ git clone git@github.com:tmartin8080/preprocess-csv.git
+$ cd preprocess-csv
 ```
 
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at [https://hexdocs.pm/app](https://hexdocs.pm/app).
+## Example Data
 
+There is an example `data.csv` in the app root, that has some
+issues in it.
+- There are spaces between the columns.
+- There are a few duplicates by email and phone.
+- One line has an extra field.
+
+## Mix Task
+
+The preprocessor is set up as a mix task with 2 args:
+
+```
+$ mix app.preprocess_users <filepath>  <dedup-strategy>
+
+Example:
+$ mix app.preprocess_users data.csv email
+```
+
+This processed file will be exported to:
+
+```
+priv/preprocessed/processed-<filename>.csv
+```
+
+## Run Tests
+
+```
+$ mix test
+```
