@@ -6,10 +6,14 @@ defmodule Mix.Tasks.App.PreprocessUsersTest do
   Configured in config.exs
   """
   use ExUnit.Case
+  @moduletag capture_log: true
+  import ExUnit.CaptureLog
 
   alias Mix.Tasks.App.PreprocessUsers, as: MixTask
 
   @data_file "test/fixtures/users.csv"
+  @email_column_index 2
+  @phone_column_index 3
 
   describe "run/1" do
     test "invalid args raise error" do
@@ -18,30 +22,44 @@ defmodule Mix.Tasks.App.PreprocessUsersTest do
       end
     end
 
-    test "dedups by email" do
-      result = MixTask.run([@data_file, "email"])
+    test "logs an error for row with extra column" do
+      fun = fn ->
+        run_task("email")
+      end
 
-      assert result == [
-               ["FirstName", "LastName", "Email", "Phone"],
-               ["Tom", "Jones", "tom@jones.com", "111-111-1111"],
-               ["Tim", "Jones", "tim@jones.com", "333-333-3333"],
-               ["Sheila", "Jones", "sheila@jones.com", "444-444-4444"],
-               ["T", "Jones", "t.jones@jones.com", "111-111-1111"],
-               ["DiffPhone", "Jones", "diff.phone@jones.com", "111.111.1111"]
-             ]
+      assert capture_log(fun) =~ "Row has length 5 - expected length 4 on line 8"
+    end
+
+    test "dedups by email" do
+      results = run_task("email")
+      emails_in_result = field_in_results(results, @email_column_index)
+
+      assert emails_in_result == Enum.uniq(emails_in_result)
     end
 
     test "dedups by phone" do
-      result = MixTask.run([@data_file, "phone"])
+      results = run_task("phone")
 
-      assert result == [
-               ["FirstName", "LastName", "Email", "Phone"],
-               ["Tom", "Jones", "tom@jones.com", "111-111-1111"],
-               ["Tim", "Jones", "tim@jones.com", "333-333-3333"],
-               ["Sheila", "Jones", "sheila@jones.com", "444-444-4444"],
-               ["T", "Jones", "t.jones@jones.com", "111-111-1111"],
-               ["DiffPhone", "Jones", "diff.phone@jones.com", "111.111.1111"]
-             ]
+      phones_in_result = field_in_results(results, @phone_column_index)
+      assert phones_in_result == Enum.uniq(phones_in_result)
     end
+
+    test "dedups by email or phone" do
+      results = run_task("email_or_phone")
+
+      emails_in_result = field_in_results(results, @email_column_index)
+      phones_in_result = field_in_results(results, @phone_column_index)
+
+      assert emails_in_result == Enum.uniq(emails_in_result)
+      assert phones_in_result == Enum.uniq(phones_in_result)
+    end
+  end
+
+  defp run_task(strategy) do
+    MixTask.run([@data_file, strategy])
+  end
+
+  defp field_in_results(results, column_index) do
+    Enum.map(results, fn row -> Enum.at(row, column_index) end)
   end
 end

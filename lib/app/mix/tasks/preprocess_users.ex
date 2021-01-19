@@ -21,12 +21,16 @@ defmodule Mix.Tasks.App.PreprocessUsers do
   def run([path, strategy]) when is_valid_strategy(strategy) do
     preprocessor = processor()
 
-    preprocessor.stream_file(path)
-    |> CSV.decode(headers: true, strip_fields: true)
-    |> Stream.map(&preprocessor.preprocess_fun/1)
-    |> Stream.filter(&preprocessor.filter_errors_fun/1)
-    |> Stream.dedup_by(&preprocessor.dedup_fun(&1, strategy))
-    |> preprocessor.write_to_csv(path)
+    result =
+      preprocessor.stream_file(path)
+      |> CSV.decode(headers: true, strip_fields: true)
+      |> Stream.map(&preprocessor.preprocess_row_fun/1)
+      |> Stream.filter(&preprocessor.filter_errors_fun/1)
+      |> preprocessor.dedup_by(strategy)
+      |> preprocessor.write_to_csv(path)
+
+    Logger.info("processed #{path}")
+    result
   end
 
   @impl Mix.Task
