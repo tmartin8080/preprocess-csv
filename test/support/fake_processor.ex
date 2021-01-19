@@ -1,9 +1,11 @@
 defmodule FakeProcessor do
   @moduledoc """
-  Used for testing the results of the filters.
-
-  As opposed to mocking, this will still allow aync: true
+  Used for testing the results of preprocessor,
+  as opposed to mocking, this will still allow aync: true
   for tests.
+
+  Delegates other functions to real processor, but handles the
+  write_to_csv/2 function to return the data.
 
   Configure in config/<env>.exs
   """
