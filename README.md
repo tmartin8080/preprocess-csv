@@ -16,6 +16,7 @@ issues in it.
 - There are spaces between the columns.
 - There are a few duplicates by email and phone.
 - One line has an extra field.
+- Different case emails.
 
 ## Mix Task
 
@@ -31,7 +32,7 @@ $ mix app.preprocess_users data.csv email
 This processed file will be exported to:
 
 ```
-priv/preprocessed/processed-<filename>.csv
+priv/preprocessed/processed-<filename>-<date>.csv
 ```
 
 ## Run Tests
