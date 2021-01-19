@@ -97,6 +97,8 @@ defmodule App.Importing.Users.PreprocessCSV do
     |> Stream.into(output)
     |> Stream.run()
 
+    Logger.info("Processed file saved to: #{local_path}")
+
     {:ok, local_path}
   end
 
