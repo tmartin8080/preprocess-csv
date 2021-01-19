@@ -1,4 +1,12 @@
 defmodule FakeProcessor do
+  @moduledoc """
+  Used for testing the results of the filters.
+
+  As opposed to mocking, this will still allow aync: true
+  for tests.
+
+  Configure in config/<env>.exs
+  """
   alias App.Importing.Users.PreprocessCSV, as: Processor
 
   defdelegate stream_file(path), to: Processor

@@ -19,18 +19,15 @@ defmodule Mix.Tasks.App.PreprocessUsers do
   @impl Mix.Task
   @shortdoc "Deduplicate rows from given CSV file"
   def run([path, strategy]) when is_valid_strategy(strategy) do
-    preprocessor = processor()
+    preprocessor = preprocessor()
+    Logger.info("Preprocessing #{path} using #{preprocessor}")
 
-    result =
-      preprocessor.stream_file(path)
-      |> CSV.decode(headers: true, strip_fields: true)
-      |> Stream.map(&preprocessor.preprocess_row_fun/1)
-      |> Stream.filter(&preprocessor.filter_errors_fun/1)
-      |> preprocessor.dedup_by(strategy)
-      |> preprocessor.write_to_csv(path)
-
-    Logger.info("processed #{path}")
-    result
+    preprocessor.stream_file(path)
+    |> CSV.decode(headers: true, strip_fields: true)
+    |> Stream.map(&preprocessor.preprocess_row_fun/1)
+    |> Stream.filter(&preprocessor.filter_errors_fun/1)
+    |> preprocessor.dedup_by(strategy)
+    |> preprocessor.write_to_csv(path)
   end
 
   @impl Mix.Task
@@ -38,7 +35,7 @@ defmodule Mix.Tasks.App.PreprocessUsers do
     raise("Invalid args. \nUsage: mix app.dedupe data.csv (email | phone | email_or_phone)")
   end
 
-  def processor do
+  def preprocessor do
     Application.get_env(:app, :user_import_preprocessor)
   end
 end
