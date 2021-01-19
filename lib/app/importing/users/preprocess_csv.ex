@@ -7,9 +7,17 @@ defmodule App.Importing.Users.PreprocessCSV do
   @default_filename "processed"
   @default_file_modes [:write, :utf8]
   @strategy_to_field_map %{
-    "email" => "Email"
+    "email" => "Email",
+    "phone" => "Phone"
   }
+
   require Logger
+
+  def process(stream) do
+    raise "are we here yet?"
+    IO.inspect(stream)
+    stream
+  end
 
   def stream_file(path) when is_binary(path) do
     case File.exists?(path) do
@@ -62,14 +70,14 @@ defmodule App.Importing.Users.PreprocessCSV do
 
     rows_stream
     |> CSV.encode(headers: ["FirstName", "LastName", "Email", "Phone"])
-    |> Enum.to_list()
     |> Stream.into(output)
+    |> Stream.run()
   end
 
   def write_to_csv(_, _), do: nil
 
   defp build_filename(path) do
-    filename = Path.rootname(path)
+    filename = Path.basename(path) |> Path.rootname()
     "#{@default_filename}-#{filename}.csv"
   end
 end

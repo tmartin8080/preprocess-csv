@@ -1,6 +1,5 @@
 use Mix.Config
 
-config :app, App.Importing.Users.PreProcessor,
- csv_writer: App.Importing.Users.PreProcessor
+config :app, :user_import_preprocessor, App.Importing.Users.PreprocessCSV
 
 import_config "#{Mix.env()}.exs"
