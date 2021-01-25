@@ -8,7 +8,14 @@ defmodule App.MixProject do
       elixir: "~> 1.11",
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
-      deps: deps()
+      deps: deps(),
+      test_coverage: [tool: ExCoveralls],
+      preferred_cli_env: [
+        coveralls: :test,
+        "coveralls.detail": :test,
+        "coveralls.post": :test,
+        "coveralls.html": :test
+      ]
     ]
   end
 
@@ -22,7 +29,8 @@ defmodule App.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:csv, "~> 2.4"}
+      {:csv, "~> 2.4"},
+      {:excoveralls, "~> 0.10", only: :test}
     ]
   end
 

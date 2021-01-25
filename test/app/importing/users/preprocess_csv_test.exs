@@ -19,6 +19,12 @@ defmodule App.Importing.Users.PreprocessCSVTest do
         Processor.stream_file("notfound.csv")
       end
     end
+
+    test "raises error when arg is non binary" do
+      assert_raise RuntimeError, ~r/File path must be a string./, fn ->
+        Processor.stream_file(123)
+      end
+    end
   end
 
   describe "preprocess_row_fun/2" do
