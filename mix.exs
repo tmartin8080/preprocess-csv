@@ -30,7 +30,8 @@ defmodule App.MixProject do
   defp deps do
     [
       {:csv, "~> 2.4"},
-      {:excoveralls, "~> 0.10", only: :test}
+      {:excoveralls, "~> 0.10", only: :test},
+      {:benchee, "~> 1.0", only: :dev}
     ]
   end
 

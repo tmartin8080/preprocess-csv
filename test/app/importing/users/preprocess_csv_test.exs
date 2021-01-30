@@ -57,25 +57,44 @@ defmodule App.Importing.Users.PreprocessCSVTest do
   describe "dudup_by/2" do
     test "dedup by email" do
       data = duplicate_data(:email)
-      assert Processor.dedup_by(data, "email") == [%{"Email" => "test@test.com"}]
+
+      assert run_dedup(data, "email") == [%{"Email" => "test@test.com"}]
     end
 
     test "dedup case-insensitive by email keeps first row found" do
       data = [%{"Email" => "TEST@test.com"} | duplicate_data(:email)]
-      assert Processor.dedup_by(data, "email") == [%{"Email" => "TEST@test.com"}]
+
+      assert run_dedup(data, "email") == [
+               %{"Email" => "TEST@test.com"}
+             ]
     end
 
     test "dedup by phone" do
       data = duplicate_data(:phone)
-      assert Processor.dedup_by(data, "phone") == [%{"Phone" => "111-111-1111"}]
+      assert run_dedup(data, "phone") == [%{"Phone" => "111-111-1111"}]
     end
 
     test "dedup by email_or_phone" do
       data = duplicate_data(:email_or_phone)
 
-      assert Processor.dedup_by(data, "email_or_phone") == [
-               %{"Phone" => "111-111-1111", "Email" => "second@test.com"},
+      assert run_dedup(data, "email_or_phone") == [
+               %{"Email" => "first@test.com", "Phone" => "111-111-1111"},
                %{"Email" => "other@test.com", "Phone" => "222-111-1111"}
+             ]
+    end
+
+    test "test order of results" do
+      data = [
+        %{"Name" => "First", "Email" => "aaa", "Phone" => "111"},
+        %{"Name" => "Second", "Email" => "bbb", "Phone" => "222"},
+        %{"Name" => "Third", "Email" => "aaa", "Phone" => "333"},
+        %{"Name" => "Fourth", "Email" => "ddd", "Phone" => "444"}
+      ]
+
+      assert run_dedup(data, "email") == [
+               %{"Name" => "First", "Email" => "aaa", "Phone" => "111"},
+               %{"Name" => "Second", "Email" => "bbb", "Phone" => "222"},
+               %{"Name" => "Fourth", "Email" => "ddd", "Phone" => "444"}
              ]
     end
   end
@@ -95,5 +114,10 @@ defmodule App.Importing.Users.PreprocessCSVTest do
       %{"Email" => "other@test.com", "Phone" => "222-111-1111"},
       %{"Email" => "other@test.com", "Phone" => "222-3333-1111"}
     ]
+  end
+
+  defp run_dedup(data, strategy) do
+    Processor.dedup_by(data, strategy)
+    |> Enum.to_list()
   end
 end

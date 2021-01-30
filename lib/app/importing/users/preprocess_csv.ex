@@ -55,25 +55,15 @@ defmodule App.Importing.Users.PreprocessCSV do
   """
   def dedup_by(stream_data, "email") do
     stream_data
-    |> Enum.reduce([], fn stream_row, acc ->
-      emails = Enum.map(acc, &String.downcase(&1["Email"]))
-
-      case Enum.member?(emails, String.downcase(stream_row["Email"])) do
-        true -> acc
-        false -> [stream_row | acc]
-      end
+    |> Stream.uniq_by(fn stream_row ->
+      String.downcase(stream_row["Email"])
     end)
   end
 
   def dedup_by(stream_data, "phone") do
     stream_data
-    |> Enum.reduce([], fn stream_row, acc ->
-      phones = Enum.map(acc, & &1["Phone"])
-
-      case Enum.member?(phones, stream_row["Phone"]) do
-        true -> acc
-        false -> [stream_row | acc]
-      end
+    |> Stream.uniq_by(fn stream_row ->
+      String.downcase(stream_row["Phone"])
     end)
   end
 
