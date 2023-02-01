@@ -28,12 +28,26 @@ defmodule Mix.Tasks.App.PreprocessUsers do
   def run([path, strategy]) when is_valid_strategy(strategy) do
     preprocessor = preprocessor()
     Logger.info("Preprocessing #{path} using #{preprocessor}")
+    seen = {MapSet.new(), MapSet.new()}
 
     with stream <- preprocessor.stream_file(path),
          stream <- CSV.decode(stream, headers: true, strip_fields: true),
-         stream <- Stream.map(stream, &preprocessor.preprocess_row_fun(&1, strategy)),
-         stream <- Stream.filter(stream, &preprocessor.filter_errors_fun/1) do
-      preprocessor.write_to_csv(stream, path)
+         stream <-
+           Stream.transform(stream, seen, fn
+             {:ok, row}, {emails, phones} = acc ->
+               row_result = check_duplicate(row, acc, strategy)
+               emails = MapSet.put(emails, row["Email"])
+               phones = MapSet.put(phones, row["Phone"])
+               {[row_result], {emails, phones}}
+
+             error, acc ->
+               {[error], acc}
+           end) do
+      dbg(stream)
+      result = Enum.to_list(stream)
+      dbg(result)
+
+      # preprocessor.write_to_csv(stream, path)
     end
   end
 
@@ -44,5 +58,33 @@ defmodule Mix.Tasks.App.PreprocessUsers do
 
   def preprocessor do
     Application.get_env(:app, :user_import_preprocessor)
+  end
+
+  defp check_duplicate(row, {emails, _}, "email") do
+    if check_duplicate(emails, row["Email"]) do
+      {:error, :duplicate_email}
+    else
+      {:ok, row}
+    end
+  end
+
+  defp check_duplicate(row, {_, phones}, "phone") do
+    if(check_duplicate(phones, row["Phone"])) do
+      {:error, :duplicate_phone}
+    else
+      {:ok, row}
+    end
+  end
+
+  defp check_duplicate(row, {emails, phones}, "email_or_phone") do
+    if check_duplicate(emails, row["Email"]) or check_duplicate(phones, row["Phonex"]) do
+      {:error, :duplicate}
+    else
+      {:ok, row}
+    end
+  end
+
+  defp check_duplicate(set, value) do
+    MapSet.member?(set, value)
   end
 end
