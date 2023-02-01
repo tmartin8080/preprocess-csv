@@ -26,15 +26,17 @@ defmodule App.Importing.Users.PreprocessCSV do
   Rows with {:ok, data} were decoded successfully
   Rows with {:error, data} had errors and are just logged to the console.
   """
-  @spec preprocess_row_fun({:ok | :error, map()}) :: map()
-  def preprocess_row_fun({:ok, row_values}) when is_map(row_values) do
+  @spec preprocess_row_fun({:ok | :error, map()}, String.t()) :: map()
+  def preprocess_row_fun({:ok, row_values}, strategy) when is_map(row_values) do
+    dbg(strategy)
+
     Enum.into(row_values, %{}, fn {key, value} ->
       {String.trim(key), process_value(key, value)}
     end)
   end
 
   # return tuple so warnings can be tracked
-  def preprocess_row_fun({:error, message}) do
+  def preprocess_row_fun({:error, message}, _strategy) do
     Logger.warn(message)
     {:error, message}
   end

@@ -31,7 +31,7 @@ defmodule App.Importing.Users.PreprocessCSVTest do
     test "trims keys and values" do
       row_data = %{" SpaceKey" => " spacevalue "}
 
-      assert Processor.preprocess_row_fun({:ok, row_data}) == %{
+      assert Processor.preprocess_row_fun({:ok, row_data}, "email") == %{
                "SpaceKey" => "spacevalue"
              }
     end
@@ -39,7 +39,7 @@ defmodule App.Importing.Users.PreprocessCSVTest do
     test "handles decode errors" do
       row_data = {:error, "Row has length 5 - expected length 4 on line 8"}
 
-      assert Processor.preprocess_row_fun(row_data) ==
+      assert Processor.preprocess_row_fun(row_data, "email") ==
                {:error, "Row has length 5 - expected length 4 on line 8"}
     end
   end

@@ -29,17 +29,17 @@ defmodule Mix.Tasks.App.PreprocessUsers do
     preprocessor = preprocessor()
     Logger.info("Preprocessing #{path} using #{preprocessor}")
 
-    preprocessor.stream_file(path)
-    |> CSV.decode(headers: true, strip_fields: true)
-    |> Stream.map(&preprocessor.preprocess_row_fun/1)
-    |> Stream.filter(&preprocessor.filter_errors_fun/1)
-    |> preprocessor.dedup_by(strategy)
-    |> preprocessor.write_to_csv(path)
+    with stream <- preprocessor.stream_file(path),
+         stream <- CSV.decode(stream, headers: true, strip_fields: true),
+         stream <- Stream.map(stream, &preprocessor.preprocess_row_fun(&1, strategy)),
+         stream <- Stream.filter(stream, &preprocessor.filter_errors_fun/1) do
+      preprocessor.write_to_csv(stream, path)
+    end
   end
 
   @impl Mix.Task
   def run(_) do
-    raise("Invalid args. \nUsage: mix app.dedupe data.csv (email | phone | email_or_phone)")
+    raise("Invalid args. \nUsage: mix app.dedupe data.csv `email | phone | email_or_phone`")
   end
 
   def preprocessor do
